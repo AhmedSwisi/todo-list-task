@@ -6,4 +6,4 @@ from flask import current_app as app
 
 @app.route("/")
 def hello_world():
-    return "Hello, From Flask Debug!"
+    return "Hello, From Flask Debug test!"
