@@ -1,11 +1,7 @@
-from flask import Flask
-from flask_cors import CORS, cross_origin
+# run.py
+from app import create_app
 
-app = Flask(__name__)
+app = create_app()
 
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
-
-@app.route("/")
-def hello_world():
-    return "Hello, From Flask Debug!"
+if __name__ == '__main__':
+    app.run()

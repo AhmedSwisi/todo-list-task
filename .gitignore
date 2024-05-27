@@ -19,6 +19,11 @@ ENV/
 ENV.bak/
 venv.bak/
 .vscode/
+venv/
+.venv/
+env/
+.env/
+.venv
 
 # Flask specific ignores
 instance/
