@@ -60,3 +60,18 @@ export const useUpdateTask = () => {
     })
     return mutation
 }
+
+const deleteTask = async (id:number) => {
+    const response = await axiosRouter.delete(`/tasks/${id}`)
+    const data = response.data
+    console.log(data)
+    return data
+}
+
+export const useDeleteTask = () => {
+    const mutation = useMutation({
+        mutationFn:(id:number) => deleteTask(id),
+        mutationKey:['tasks']
+    })
+    return mutation
+}
