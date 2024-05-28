@@ -80,3 +80,24 @@ def update_task_status(task_id):
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
         return error
+    
+@tasks.route('/tasks/<int:task_id>',methods=['DELETE'])
+# @swag_from({
+#     'responses': {
+#         200: {
+#             'description': 'returns all tasks',
+#             'examples': {
+#                 'text/plain': 'Hello, From Flask Debug test resolve!'
+#             }
+#         }
+#     }
+# })
+def delete_task(task_id):
+    try:
+        Task.query.filter_by(id = task_id).delete()
+        db.session.commit()
+        return jsonify({'message':'Task deleted successfully',
+                        }),201
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        return error
