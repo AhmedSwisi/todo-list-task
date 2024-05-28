@@ -1,41 +1,47 @@
 # app/routes.py
-from flask import render_template, redirect, url_for, jsonify, request
+from flask import jsonify, request,g
 from flask import current_app as app
 from flask import Blueprint
 from flasgger import swag_from
-from .models import Task
-from .extensions import db
+from .models import Task, User
+from .extensions import db,auth_manager
 from sqlalchemy.exc import SQLAlchemyError
+from flask_pyjwt import jwt,require_token
+from datetime import datetime, timedelta
+from .utils import decode_jwt
+from functools import wraps
 
-tasks = Blueprint('hello', __name__)
+tasks = Blueprint('tasks', __name__)
+auth = Blueprint('auth',__name__,url_prefix='/auth')
+
+def require_token():
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            auth_header = request.headers.get('Authorization')
+            if auth_header and auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+                try:
+                    payload = decode_jwt(token)
+                    g.identity = payload['sub']
+                except Exception as e:
+                    return jsonify({'message': 'auth token is not valid'}), 401
+            else:
+                return jsonify({'message': 'auth token is missing'}), 401
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 @tasks.route("/tasks")
-@swag_from({
-    'responses': {
-        200: {
-            'description': 'returns all tasks',
-            'examples': {
-                'text/plain': 'Hello, From Flask Debug test resolve!'
-            }
-        }
-    }
-})
+@require_token()
 def read_all_tasks():
-    tasks = Task.query.all()
+    user_id = g.identity
+    tasks = Task.query.filter_by(user_id=user_id).all()
     tasks_dict = [task.to_dict() for task in tasks]
     return jsonify(tasks_dict)
 
 @tasks.route('/tasks',methods=['POST'])
-@swag_from({
-    'responses': {
-        200: {
-            'description': 'returns all tasks',
-            'examples': {
-                'text/plain': 'Hello, From Flask Debug test resolve!'
-            }
-        }
-    }
-})
+@require_token()
 def add_task():
     try:
         title = request.json['title']
@@ -56,16 +62,7 @@ def add_task():
         return error
 
 @tasks.route('/tasks/<int:task_id>',methods=['PUT'])
-# @swag_from({
-#     'responses': {
-#         200: {
-#             'description': 'returns all tasks',
-#             'examples': {
-#                 'text/plain': 'Hello, From Flask Debug test resolve!'
-#             }
-#         }
-#     }
-# })
+@require_token()
 def update_task_status(task_id):
     try:
         task: Task = Task.query.get(task_id)
@@ -82,16 +79,7 @@ def update_task_status(task_id):
         return error
     
 @tasks.route('/tasks/<int:task_id>',methods=['DELETE'])
-# @swag_from({
-#     'responses': {
-#         200: {
-#             'description': 'returns all tasks',
-#             'examples': {
-#                 'text/plain': 'Hello, From Flask Debug test resolve!'
-#             }
-#         }
-#     }
-# })
+@require_token()
 def delete_task(task_id):
     try:
         Task.query.filter_by(id = task_id).delete()
@@ -101,3 +89,69 @@ def delete_task(task_id):
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
         return error
+
+
+@auth.route("/login",methods=['POST'])
+def post_token():
+    email = request.json['email']
+    password = request.json['password']
+    user:User = User.query.filter_by(email=email).first()
+    if user and user.check_password(password):
+        token = auth_manager.auth_token(subject=user.id, identity=email)
+        refresh_token = auth_manager.refresh_token(user.id)
+        
+        return jsonify(
+            {
+            'access_token': token.signed,
+            'refresh_token':refresh_token.signed
+            }
+                        ), 200
+    
+    return jsonify({'message': 'Invalid credentials'}), 401
+
+@auth.route("/user", methods=['GET'])
+@require_token()
+def get_auth_user():
+    user_id = g.identity
+    user = User.query.get(user_id)
+    if user:
+        return jsonify(user.to_dict()), 200
+    return jsonify({'message': 'User not found'}), 404
+
+
+
+@auth.route("/register", methods=['POST'])
+def register():
+    email = request.json['email']
+    password = request.json['password']
+    username = request.json['username']
+    
+    if User.query.filter_by(email=email).first():
+        return jsonify({'message': 'User already exists'}), 409
+    
+    new_user = User(email=email,username=username)
+    new_user.set_password(password)
+    db.session.add(new_user)
+    db.session.commit()
+    
+    return jsonify({'message': 'User registered successfully'}), 201
+
+@auth.route("/refresh", methods=['POST'])
+def refresh_token():
+    refresh_token = request.json['refresh_token']
+    if not refresh_token:
+        return jsonify({'message': 'Refresh token is missing'}), 400
+
+    try:
+        payload = decode_jwt(refresh_token)
+        user_id = payload['sub']
+        user = User.query.get(user_id)
+        
+        if user:
+            access_token = auth_manager.auth_token(subject=user.id, identity=user.email)
+            return jsonify({'access_token': access_token.signed}), 200
+        else:
+            return jsonify({'message': 'Invalid refresh token'}), 401
+
+    except jwt.InvalidTokenError:
+        return jsonify({'message': 'Invalid refresh token'}), 401
