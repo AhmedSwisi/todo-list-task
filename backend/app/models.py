@@ -21,6 +21,9 @@ class Task(db.Model):
     user_id:Mapped[int] = mapped_column(ForeignKey("user.id"))
     user:Mapped["User"] = relationship("User", back_populates="tasks")
 
+    def __init__(self, **kwargs):
+        super(Task, self).__init__(**kwargs)
+
     def to_dict(self):
         return {
             'id': self.id,
