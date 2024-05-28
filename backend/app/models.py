@@ -19,4 +19,13 @@ class Task(db.Model):
     description:Mapped[str] = mapped_column(String(256), nullable=False)
     status:Mapped[str] = mapped_column(String(80), nullable=False)
     user_id:Mapped[int] = mapped_column(ForeignKey("user.id"))
-    user:Mapped["User"] = relationship("User", back_populates="task")
+    user:Mapped["User"] = relationship("User", back_populates="tasks")
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'status': self.status,
+            'user_id': self.user_id
+        }
