@@ -15,6 +15,11 @@ export interface PostTask {
     user_id:number
 }
 
+export interface UpdateTask {
+    id:number,
+    status:string
+}
+
 const getTasks = async () => {
     const response = await axiosRouter.get("/tasks")
     const data = response.data
@@ -37,6 +42,20 @@ const addTask = async (task:PostTask) => {
 export const useAddTask = () => {
     const mutation = useMutation({
         mutationFn:(task:PostTask) => addTask(task),
+        mutationKey:['tasks']
+    })
+    return mutation
+}
+const updateTask = async (id:number,status:string) => {
+    const response = await axiosRouter.put(`/tasks/${id}`,{status})
+    const data = response.data
+    console.log(data)
+    return data
+}
+
+export const useUpdateTask = () => {
+    const mutation = useMutation({
+        mutationFn:(data:UpdateTask) => updateTask(data.id,data.status),
         mutationKey:['tasks']
     })
     return mutation

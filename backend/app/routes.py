@@ -54,3 +54,29 @@ def add_task():
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
         return error
+
+@tasks.route('/tasks/<int:task_id>',methods=['PUT'])
+# @swag_from({
+#     'responses': {
+#         200: {
+#             'description': 'returns all tasks',
+#             'examples': {
+#                 'text/plain': 'Hello, From Flask Debug test resolve!'
+#             }
+#         }
+#     }
+# })
+def update_task_status(task_id):
+    try:
+        task: Task = Task.query.get(task_id)
+        status = request.json['status']
+        task.status = status
+        db.session.commit()
+        return jsonify({'message':'Task updated successfully',
+                        'title':task.title,
+                        'description':task.description,
+                        'status':task.status,
+                        }),201
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        return error
