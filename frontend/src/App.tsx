@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import './App.css'
 import { Task, useAddTask, useDeleteTask, useGetTasks, useUpdateTask } from './api/tasks'
 import { Button } from './components/ui/button'
+import { login, register } from './api/auth'
 
 
 function App() {
@@ -10,6 +11,8 @@ function App() {
   const updateMutation = useUpdateTask()
   const deleteMutation = useDeleteTask()
   const queryClient = useQueryClient()
+
+
   return (
     <div>
       <div>
@@ -24,6 +27,8 @@ function App() {
         })}>Add Task</Button>
         <Button onClick={() => updateMutation.mutate({id:24,status:"Complete"})}>Update Task</Button>
         <Button onClick={() => deleteMutation.mutate(24)}>Delete</Button>
+        <Button onClick={async () => register("React","react@test.com","pass@1234")}>Register</Button>
+        <Button onClick={async () => login("test@example.com","pass@1234")}>Login</Button>
       </div>
     </div>
   )
