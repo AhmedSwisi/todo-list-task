@@ -32,7 +32,7 @@ const DeleteButton:React.FC<Props> = ({id}) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">Delete</Button>
+        <Button className="rounded-r-none" variant="default">Delete</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

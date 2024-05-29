@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "./ui/button";
 import {
     Select,
     SelectContent,
@@ -9,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select"
-import { useDeleteTask, useUpdateTask } from "@/api/tasks";
+import { useUpdateTask } from "@/api/tasks";
 import DeleteButton from "./DeleteButton";
 
 
@@ -42,14 +41,15 @@ const TodoListItem:React.FC<Props> = ({todo}) => {
    
 
   return (
-  <div className="flex flex-row">
-    <div className="flex flex-col gap-4">
-        <p>{todo.title}</p>
-        <p>{todo.description}</p>
+  <div className="flex flex-row gap-10 justify-start items-center w-full">
+    <div className="flex flex-col justify-start items-start gap-2 w-80 break-words">
+        <p className="font-semibold text-wrap flex  w-80">{todo.title}</p>
+        <p className="font-semibold text-wrap flex  w-80">{todo.description}</p>
     </div>
+    <div className="flex flex-row">
     <DeleteButton id={todo.id}/>
     <Select onValueChange={handleSelectChange}>
-    <SelectTrigger className="w-[180px]">
+    <SelectTrigger className="w-[180px] border border-l-0 rounded-l-none">
         <SelectValue defaultValue={todo.status} placeholder={todo.status} />
       </SelectTrigger>
       <SelectContent>
@@ -60,6 +60,7 @@ const TodoListItem:React.FC<Props> = ({todo}) => {
         </SelectGroup>
       </SelectContent>
     </Select>
+    </div>
   </div>
 )
 };

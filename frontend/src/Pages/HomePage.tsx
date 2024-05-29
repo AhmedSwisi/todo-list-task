@@ -27,7 +27,6 @@ const HomePage = () => {
     const {
         register,
         handleSubmit,
-        setError,
         formState: { errors, isSubmitting },
     } = useForm<FormFields>({
         resolver: zodResolver(schema),
@@ -35,10 +34,10 @@ const HomePage = () => {
 
     // Fetch the current user
     const { data: user } = useUser();
-    if (!user) {
-        navigate('/login');
-        return null; // Return null to prevent rendering until redirect happens
-    }
+    // if (!user) {
+    //     navigate('/login');
+    //     return null; // Return null to prevent rendering until redirect happens
+    // }
 
     // Handle form submission
     const handleAddTaskFormSubmit: SubmitHandler<FormFields> = async (data) => {
@@ -56,16 +55,16 @@ const HomePage = () => {
     };
 
     return (
-        <div className="grid grid-cols-2 gap-8">
-            <div>
-                <h1>Todo List</h1>
+        <div className="grid grid-cols-2 gap-x-4  justify-center mt-12">
+            <div className="flex flex-col gap-6 ml-20">
+                <h1 className="font-bold text-5xl">Todo List</h1>
                 {isLoading && <p>Loading tasks...</p>}
                 {error && <p>Failed to load tasks</p>}
                 {tasks && <TodoList todos={tasks} />}
             </div>
-            <div className="flex flex-col gap-8">
-                <form onSubmit={handleSubmit(handleAddTaskFormSubmit)}>
-                    <h1>Add Task</h1>
+            <div className="flex flex-col pr-40">
+                <form className="flex flex-col gap-4" onSubmit={handleSubmit(handleAddTaskFormSubmit)}>
+                    <h1 className="text-4xl font-semibold">Add Task</h1>
                     <div className="flex flex-col gap-y-6 w-full">
                         <div className="flex flex-col justify-start items-start w-full gap-2">
                             <label className="text-black">Title</label>
