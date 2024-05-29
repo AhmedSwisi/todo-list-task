@@ -34,10 +34,10 @@ const HomePage = () => {
 
     // Fetch the current user
     const { data: user } = useUser();
-    // if (!user) {
-    //     navigate('/login');
-    //     return null; // Return null to prevent rendering until redirect happens
-    // }
+    if (!user) {
+        navigate('/login');
+        return null; // Return null to prevent rendering until redirect happens
+    }
 
     // Handle form submission
     const handleAddTaskFormSubmit: SubmitHandler<FormFields> = async (data) => {
