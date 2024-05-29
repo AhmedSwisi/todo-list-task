@@ -27,7 +27,6 @@ env/
 
 # Flask specific ignores
 instance/
-config.py
 *.env
 *.flaskenv
 *.sqlite3
