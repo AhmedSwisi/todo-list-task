@@ -1,6 +1,7 @@
 import { useQuery} from "@tanstack/react-query";
 import { axiosRouter } from "./config";
 import Cookies from "universal-cookie";
+import { AxiosError } from "axios";
 
 const cookies = new Cookies()
 
@@ -12,19 +13,19 @@ const getCurrentUser = async () => {
 }
 
 export const useUser = () => {
-    const user = useQuery({queryKey:['tasks'], queryFn:getCurrentUser})
+    const user = useQuery({queryKey:['user'], queryFn:getCurrentUser})
     return user
 }
 
 export const login = async (email:string, password:string) => {
     try {
-    const response = await axiosRouter.post('/auth/login',{email,password})
-    console.log(response.data)
-    const {access_token, refresh_token} = response.data
-    console.log(access_token)
-    console.log(refresh_token)
-    cookies.set('access',access_token,{path:'/'})
-    cookies.set('refresh',refresh_token,{path:'/'})
+        const response = await axiosRouter.post('/auth/login',{email,password})
+        const {access_token, refresh_token} = response.data
+        console.log(access_token)
+        console.log(refresh_token)
+        cookies.set('access_token',access_token,{path:'/'})
+        cookies.set('refresh_token',refresh_token,{path:'/'})
+        return response.data
     } catch (error){
         console.log("login failed",error)
     }
@@ -38,6 +39,11 @@ export const register = async (username:string, email:string, password:string) =
         console.log(data)
         return data
     } catch (error) {
-        console.log(error)
+        if (error instanceof AxiosError) {
+            console.log("Axios error:", error.response);
+        } else {
+            console.log("Unknown error:", error);
+        }
+        throw error; // Re-throw the error so it can be caught by the caller
     }
 }

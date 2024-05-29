@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosRouter } from "./config";
 
 
@@ -21,15 +21,16 @@ export interface UpdateTask {
     status:string
 }
 
-const getTasks = async () => {
+export const getTasks = async () => {
     const response = await axiosRouter.get("/tasks")
+    console.log(response)
     const data = response.data
     console.log(data)
     return data
 }
 
 export const useGetTasks = () => {
-    const tasks = useQuery({queryKey:['tasks'], queryFn:getTasks})
+    const tasks = useQuery({queryKey:['tasks'], queryFn:getTasks,staleTime:0})
     return tasks
 }
 
@@ -41,9 +42,13 @@ const addTask = async (task:PostTask) => {
 }
 
 export const useAddTask = () => {
+    const queryClient = useQueryClient()
     const mutation = useMutation({
         mutationFn:(task:PostTask) => addTask(task),
-        mutationKey:['tasks']
+        mutationKey:['tasks'],
+        onSuccess:() => {
+            queryClient.fetchQuery({queryKey:['tasks'],queryFn:getTasks})
+        }
     })
     return mutation
 }
@@ -70,9 +75,13 @@ const deleteTask = async (id:number) => {
 }
 
 export const useDeleteTask = () => {
+    const queryClient = useQueryClient()
     const mutation = useMutation({
         mutationFn:(id:number) => deleteTask(id),
-        mutationKey:['tasks']
+        mutationKey:['tasks'],
+        onSuccess:() => {
+            queryClient.fetchQuery({queryKey:['tasks'],queryFn:getTasks})
+        }
     })
     return mutation
 }

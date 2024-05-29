@@ -10,7 +10,6 @@ function App() {
   const addMutation = useAddTask()
   const updateMutation = useUpdateTask()
   const deleteMutation = useDeleteTask()
-  const queryClient = useQueryClient()
 
 
   return (
