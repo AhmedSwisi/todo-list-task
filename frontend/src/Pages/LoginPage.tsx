@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
-import { login } from "@/api/auth";
+import { getCurrentUser, login, useUser } from "@/api/auth";
 import { AxiosError } from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -25,12 +25,21 @@ const LoginPage = () => {
     resolver:zodResolver(schema)
   })
 
+  // if (user) {
+  //   navigate("/")
+  // }
+
+  
+
 const handleLoginFormSubmit: SubmitHandler<FormFields> = async (data) => {
 
   try {
     const response = await login(data.email, data.password)
     if (response) {
-      navigate("/")
+      const user = await getCurrentUser()
+      if (user) {
+        navigate("/")
+      }
     }
   } catch (error:unknown) {
     if (error instanceof AxiosError) {
