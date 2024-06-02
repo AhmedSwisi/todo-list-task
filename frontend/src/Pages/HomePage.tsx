@@ -1,4 +1,4 @@
-import { useUser } from "@/api/auth";
+import { logout, useUser } from "@/api/auth";
 import { useAddTask, useGetTasks } from "@/api/tasks";
 import { TodoList } from "@/components/TodoList";
 import { z } from "zod";
@@ -39,6 +39,14 @@ const HomePage = () => {
         return null; // Return null to prevent rendering until redirect happens
     }
 
+    const onLogoutButtonClick = async () => {
+        const response = await logout()
+        if (response){
+            navigate("/login")
+        }
+
+    }
+
     // Handle form submission
     const handleAddTaskFormSubmit: SubmitHandler<FormFields> = async (data) => {
         try {
@@ -64,7 +72,10 @@ const HomePage = () => {
             </div>
             <div className="flex flex-col pr-40">
                 <form className="flex flex-col gap-4" onSubmit={handleSubmit(handleAddTaskFormSubmit)}>
+                    <div className="flex flex-row justify-between">
                     <h1 className="text-4xl font-semibold">Add Task</h1>
+                    <Button onClick={onLogoutButtonClick}>Logout</Button>
+                    </div>
                     <div className="flex flex-col gap-y-6 w-full">
                         <div className="flex flex-col justify-start items-start w-full gap-2">
                             <label className="text-black">Title</label>

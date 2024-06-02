@@ -5,7 +5,7 @@ import { AxiosError } from "axios";
 
 const cookies = new Cookies()
 
-const getCurrentUser = async () => {
+export const getCurrentUser = async () => {
     const response = await axiosRouter.get("/auth/user")
     const data = response.data
     console.log(data)
@@ -47,3 +47,21 @@ export const register = async (username:string, email:string, password:string) =
         throw error; // Re-throw the error so it can be caught by the caller
     }
 }
+
+export const logout = async () => {
+    try {
+        const accessToken = cookies.get('access_token');
+        await axiosRouter.post('/auth/logout', {}, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+        cookies.remove('access_token', { path: '/' });
+        cookies.remove('refresh_token', { path: '/' });
+        console.log("Logged out successfully");
+        return true
+    } catch (error) {
+        console.log("logout failed", error);
+        return false
+    }
+};
