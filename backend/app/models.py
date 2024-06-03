@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Text, ForeignKey
+from sqlalchemy import Integer, String, Text, ForeignKey, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import db
 from typing import List
@@ -9,9 +9,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class User(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
-    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False, info={'validate': 'email'})
     password:Mapped[str]
     tasks:Mapped[List["Task"]] = relationship("Task",back_populates="user", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        CheckConstraint(
+            "email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'", 
+            name='valid_email'
+        ),
+    )
 
     def __repr__(self):
         return f'<User {self.username}>'
